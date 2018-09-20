@@ -40,7 +40,7 @@ def spellCheck(query):
     print("Hunting for %s" %(query))
     return query
 
-def nextPage(nodeFinder):
+def nextPage(nodeFinder, driver):
     """Click next page button on google search"""
 
     try:
@@ -53,7 +53,7 @@ def nextPage(nodeFinder):
         print(ex)
         driver.quit()
 
-def findEden():
+def findEden(driver):
     """Returns edenLink if found"""
 
     edenNode = None # the edenNode is the element to the initial pixiv pic
@@ -82,7 +82,7 @@ def findEden():
 
         # Load next page of results
         if nodeFinder > 10:
-            nextPage(nodeFinder)
+            nextPage(nodeFinder, driver)
 
     return edenLink
 
@@ -144,28 +144,19 @@ def collect_img_links(driver, eden, dataLimit):
 class ImageScraper:
     """Downloads images to a path, given url list"""
 
-    def __init__(self, waifu, urlz, download_path):
+    def __init__(self, waifu, urlz, download_path, driver):
         self.waifu = waifu
         self.urlz = urlz
         self.download_path = download_path
+        self.driver = driver
 
-        self.session = requests.Session()
-
-    def scrape_images(self):
-        i = 0
-        for url in self.urlz:
-            response = self.session.get(url).text
-            i += 1
-            self.save_image('%s_%d'%(self.waifu, i), url)
-
-    def save_image(self, file_name, item_link):
-        response = self.session.get(item_link, stream=True)
-        print(response.status_code)
-        if response.status_code == 200:
-            with open(os.path.join(self.download_path, file_name), 'wb') as image_file:
-                for chunk in response.iter_content(1024):
-                    image_file.write(chunk)
-        print(file_name)
+    def scrape_images():
+        bs_url = self.download_path[0]
+        driver.wait = WebDriverWait(driver, 50)
+        driver.get(bs_url)
+        WebDriverWait(driver,20).until(EC.presence_of_element_located((By.ID,"table_all_pid_")))
+        WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.ID,"table_all_pid_")))
+        Stats = driver.find_element_by_id("table_all_pid_").click()
 
 def main():
     # Get input. user=loginData[0] pass=loginData[1] waifu=loginData[2]
@@ -189,14 +180,14 @@ def main():
     search_box.submit()
 
     # goog search
-    edenLink = findEden()
+    edenLink = findEden(driver)
 
     # Get jpg links
     pics = collect_img_links(driver, edenLink, dataLimit)
-    driver.quit()
 
     # Start downloading
-    scraper = ImageScraper(loginData[2], pics, path)
+    scraper = ImageScraper(loginData[2], pics, path, driver)
     scraper.scrape_images()
+    driver.quit()
 
 main()
