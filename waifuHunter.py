@@ -2,7 +2,6 @@ import time
 import os
 import sys
 from selenium import webdriver
-import requests
 
 def encodeQuery(q):
     """Converts space to + in url component"""
@@ -93,17 +92,6 @@ def findEden(driver):
 def scroll_down(driver):
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-def loginDetails():
-    """Gets input and returns user/pass/waifu in list"""
-    import getpass
-
-    details = []
-    details.append(input("Email or pixiv ID: "))
-    details.append(getpass.getpass("Password: "))
-    details.append(spellCheck(input("Please type waifu\n>>>")))
-    return details
-
-
 def login(driver, username, password):
     """Go to login page and attempt login"""
     driver.get('https://accounts.pixiv.net/login')
@@ -139,43 +127,45 @@ def collect_img_links(driver, eden, dataLimit):
 
     return pixiv_links
 
+def isAlertPresent(driver):
+    try:
+        driver.switch_to().alert();
+        return True
+    except:
+        return False
+
 def scrape_images(pixiv_links, driver):
     for i in range(len(pixiv_links)):
         driver.get(pixiv_links[i])
-        try:
-            driver.find_element_by_xpath('//*[@id="pxvdwn_l"]').click()
-            time.sleep(8)
-        except Exception as e:
-            print(e)
+        while isAlertPresent(driver) is True:
             alert = driver.switch_to.alert
             alert.accept()
-            try:
-                driver.find_element_by_xpath('//*[@id="pxvdwn_l"]').click()
-                time.sleep(8)
-            except Exception as e:
-                print(e)
+        try:
+            driver.find_element_by_xpath('//*[@id="pxvdwn_l"]').click()
+        except:
+            while isAlertPresent(driver) is True:
                 alert = driver.switch_to.alert
                 alert.accept()
-                driver.find_element_by_xpath('//*[@id="pxvdwn_l"]').click()
-                time.sleep(8)
-
+            driver.find_element_by_xpath('//*[@id="pxvdwn_l"]').click()
+        time.sleep(1)
         print("done with %d pix" %(i+1))
 
 def main():
     # Get input. user=loginData[0] pass=loginData[1] waifu=loginData[2]
-    loginData = loginDetails()
-    #loginData = ["astrooo", "", "saber"]
+    loginData = ['whxsss', 'saberisbestdotcom', spellCheck(input("Please type waifu\n>>>"))]
     dataLimit = int(input("num of pix: "))
     path = os.getcwd()
     download_path = path + '\\' + loginData[2]
     print('Downloading %d pix to %s' %(dataLimit, download_path))
 
     # Start the driver
-    from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
 
     chrome_options = Options()
-    chrome_options.add_experimental_option('prefs', {'download.default_directory':download_path})
+    chrome_options.add_experimental_option('prefs', {
+    'profile.default_content_setting_values.automatic_downloads': 1,
+    'download.default_directory':download_path
+    })
     chrome_options.add_extension(path + '\\Pixiv-Downloader_v1.2.10.72.crx')
     driver = webdriver.Chrome(chrome_options=chrome_options)
     extensionSetup(driver)
