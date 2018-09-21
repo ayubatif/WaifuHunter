@@ -1,4 +1,4 @@
-## WaifuHunter
+# WaifuHunter
 
 <p align="center">
   <img src="wh.png"/>
@@ -45,6 +45,6 @@ git clone https://github.com/ArtiusAstro/wHunter
 
 #### Windows
 
-1. Click [here](http://search.maven.org/classic/#search%7Cga%7C1%7Cg%3A%22com.taobao.arthas%22%20AND%20a%3A%22arthas-packaging%22) to Download the latest binary releases.
+1. Click [here](https://github.com/ArtiusAstro/wHunter/archive/master.zip) to Download the latest binary release.
 2. Unzip the file.
 3. Run the file `wh.bat`
