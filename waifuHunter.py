@@ -58,12 +58,16 @@ def nextPage(nodeFinder, driver):
 
 def findEden(driver):
     """Returns edenLink if found"""
+    exit = 0;
 
     edenNode = None # the edenNode is the element to the initial pixiv pic
     edenFound = 0
     nodeFinder = 1 # incrementing int to find edenNode
 
     while edenFound is 0:
+        if exit > 4:
+            print("couldnt find a link to a pic, try another character")
+            exit()
         xpath = '//*[@id="rso"]/div/div/div[%s]/div/div/h3/a' %(nodeFinder)
 
         # Get a search result
@@ -71,6 +75,7 @@ def findEden(driver):
             edenNode = driver.find_element_by_xpath(xpath)
         except:
             nextPage(nodeFinder, driver)
+            exit = exit + 1
             continue
 
         # Get link
@@ -137,15 +142,14 @@ def isAlertPresent(driver):
 def scrape_images(pixiv_links, driver):
     for i in range(len(pixiv_links)):
         driver.get(pixiv_links[i])
-        driver.find_element_by_xpath('//*[@id="pxvdwn_l"]').click()
-        while isAlertPresent(driver) is True:
-            alert = driver.switch_to.alert
-            alert.accept()
+        try:
             driver.find_element_by_xpath('//*[@id="pxvdwn_l"]').click()
-        while isAlertPresent(driver) is True:
-            alert = driver.switch_to.alert
-            alert.accept()
-        time.sleep(1)
+            while isAlertPresent(driver) is True:
+                alert = driver.switch_to.alert
+                alert.accept()
+            time.sleep(8)
+        except:
+            continue
         print("done with %d pix" %(i+1))
 
 def main():
