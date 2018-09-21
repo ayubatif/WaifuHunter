@@ -67,7 +67,7 @@ def findEden(driver):
     while edenFound is 0:
         if exit > 4:
             print("couldnt find a link to a pic, try another character")
-            exit()
+            os.exit()
         xpath = '//*[@id="rso"]/div/div/div[%s]/div/div/h3/a' %(nodeFinder)
 
         # Get a search result
@@ -97,7 +97,7 @@ def findEden(driver):
 def scroll_down(driver):
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-def login(driver, username, password):
+def login(driver, username, password, EXPLICIT_CONTENT):
     """Go to login page and attempt login"""
     driver.get('https://accounts.pixiv.net/login')
     userBox = driver.find_element_by_xpath('//*[@id="LoginComponent"]/form/div[1]/div[1]/input')
@@ -105,7 +105,10 @@ def login(driver, username, password):
     userBox.send_keys(username)
     passBox.send_keys(password)
     passBox.submit()
-    time.sleep(3)
+    if EXPLICIT_CONTENT is True:
+        driver.get("https://www.pixiv.net/setting_user.php")
+        driver.find_element_by_xpath('//*[@id="page-setting-user"]/div/div[2]/div[2]/form/table/tbody/tr[2]/td/dl/dd[1]/label[1]/input').click()
+        driver.find_element_by_xpath('//*[@id="page-setting-user"]/div/div[2]/div[2]/form/div/input').click()
 
 def collect_img_links(driver, eden, dataLimit):
     """get all jpg links"""
@@ -155,6 +158,9 @@ def scrape_images(pixiv_links, driver):
 def main():
     # Get input. user=loginData[0] pass=loginData[1] waifu=loginData[2]
     loginData = ['whxsss', 'saberisbestdotcom', spellCheck(input("Please type waifu\n>>>"))]
+    EXPLICIT_CONTENT = False
+    if input("type 'y' if you would like to enable explicit R18 pix, else enter: ") == 'y':
+        EXPLICIT_CONTENT = True
     dataLimit = int(input("num of pix: "))
     path = os.getcwd()
     download_path = path + '\\' + loginData[2]
@@ -173,7 +179,7 @@ def main():
     extensionSetup(driver)
 
     # Login
-    login(driver, loginData[0], loginData[1])
+    login(driver, loginData[0], loginData[1], EXPLICIT_CONTENT)
 
     # Homepage search
     driver.get('http://www.google.com/xhtml')
@@ -189,10 +195,18 @@ def main():
 
     # Start downloading
     try:
-        os.mkdir(loginData[2]) # pix folder
+        os.mkdir(loginData[2]) # make new folder
     except:
-        print(' ')
+        print(' ') # use existing folder
     scrape_images(pixiv_links, driver)
+
+    # Reset R18 Filter
+    if EXPLICIT_CONTENT is True:
+        driver.get("https://www.pixiv.net/setting_user.php")
+        driver.find_element_by_xpath('//*[@id="page-setting-user"]/div/div[2]/div[2]/form/table/tbody/tr[2]/td/dl/dd[1]/label[2]/input').click()
+        driver.find_element_by_xpath('//*[@id="page-setting-user"]/div/div[2]/div[2]/form/div/input').click()
+
+    # Done
     driver.quit()
 
 main()
