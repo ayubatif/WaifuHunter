@@ -1,6 +1,8 @@
 ## WaifuHunter
 
-![wHunter](wh.png)
+<p align="center">
+  <img src="wh.png"/>
+</p>
 
 `WaifuHunter` is a Selenium Chromedriver based web scraper.
 
