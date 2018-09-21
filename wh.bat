@@ -1,2 +1,2 @@
 @echo off
-py waifuHunter.py
+"C:\\Users\\astro\\AppData\\Local\\Programs\\Python\\Python36\\python.exe" "waifuHunter.py"

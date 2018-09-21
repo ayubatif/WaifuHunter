@@ -4,7 +4,6 @@ import sys
 from selenium import webdriver
 import requests
 
-
 def encodeQuery(q):
     """Converts space to + in url component"""
     return '+'.join(q.split())
@@ -40,6 +39,11 @@ def spellCheck(query):
     print("Hunting for %s" %(query))
     return query
 
+def extensionSetup(driver):
+    driver.get('chrome-extension://fnbkeopcpjainobjebddfcnnknmfipid/options.html')
+    driver.find_element_by_xpath('//*[@id="option_list"]/div[4]/label[3]/input').click()
+    driver.find_element_by_xpath('//*[@id="save"]').click()
+
 def nextPage(nodeFinder, driver):
     """Click next page button on google search"""
 
@@ -67,7 +71,7 @@ def findEden(driver):
         try:
             edenNode = driver.find_element_by_xpath(xpath)
         except:
-            nextPage(nodeFinder)
+            nextPage(nodeFinder, driver)
             continue
 
         # Get link
@@ -124,7 +128,7 @@ def collect_img_links(driver, eden, dataLimit):
 
         pixiv_links.append(driver.current_url)
         for j in range(1,180):
-            url = driver.find_element_by_xpath('//*[@id="root"]/div[1]/div/aside[3]/div[1]/ul/li[%d]/a[2]' %(j)).get_attribute('href')
+            url = driver.find_element_by_xpath('//*[@id="root"]/div[1]/div/aside[3]/div[1]/ul/li[%d]/div/a[2]' %(j)).get_attribute('href')
             pixiv_links.append(url)
             if (180*i + j + i+1) > dataLimit:
                 n = 1
@@ -133,42 +137,48 @@ def collect_img_links(driver, eden, dataLimit):
         eden = pixiv_links[180*i + i+1]
         i = i + 1
 
-    for j in range(len(pixiv_links)):
-        print('done with %d' %(j+1))
-        driver.get(pixiv_links[j])
-        img_links.append(driver.find_element_by_class_name('_2r_DywD').get_attribute('src'))
+    return pixiv_links
 
-    return img_links
+def scrape_images(pixiv_links, driver):
+    for i in range(len(pixiv_links)):
+        driver.get(pixiv_links[i])
+        try:
+            driver.find_element_by_xpath('//*[@id="pxvdwn_l"]').click()
+            time.sleep(8)
+        except Exception as e:
+            print(e)
+            alert = driver.switch_to.alert
+            alert.accept()
+            try:
+                driver.find_element_by_xpath('//*[@id="pxvdwn_l"]').click()
+                time.sleep(8)
+            except Exception as e:
+                print(e)
+                alert = driver.switch_to.alert
+                alert.accept()
+                driver.find_element_by_xpath('//*[@id="pxvdwn_l"]').click()
+                time.sleep(8)
 
-
-class ImageScraper:
-    """Downloads images to a path, given url list"""
-
-    def __init__(self, waifu, urlz, download_path, driver):
-        self.waifu = waifu
-        self.urlz = urlz
-        self.download_path = download_path
-        self.driver = driver
-
-    def scrape_images():
-        bs_url = self.download_path[0]
-        driver.wait = WebDriverWait(driver, 50)
-        driver.get(bs_url)
-        WebDriverWait(driver,20).until(EC.presence_of_element_located((By.ID,"table_all_pid_")))
-        WebDriverWait(driver,20).until(EC.element_to_be_clickable((By.ID,"table_all_pid_")))
-        Stats = driver.find_element_by_id("table_all_pid_").click()
+        print("done with %d pix" %(i+1))
 
 def main():
     # Get input. user=loginData[0] pass=loginData[1] waifu=loginData[2]
     loginData = loginDetails()
+    #loginData = ["astrooo", "", "saber"]
     dataLimit = int(input("num of pix: "))
     path = os.getcwd()
+    download_path = path + '\\' + loginData[2]
+    print('Downloading %d pix to %s' %(dataLimit, download_path))
 
     # Start the driver
+    from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
+
     chrome_options = Options()
-    chrome_options.add_argument("--window-size=1920x1080")
-    driver = webdriver.Chrome(path + "\\chromedriver.exe")
+    chrome_options.add_experimental_option('prefs', {'download.default_directory':download_path})
+    chrome_options.add_extension(path + '\\Pixiv-Downloader_v1.2.10.72.crx')
+    driver = webdriver.Chrome(chrome_options=chrome_options)
+    extensionSetup(driver)
 
     # Login
     login(driver, loginData[0], loginData[1])
@@ -183,11 +193,14 @@ def main():
     edenLink = findEden(driver)
 
     # Get jpg links
-    pics = collect_img_links(driver, edenLink, dataLimit)
+    pixiv_links = collect_img_links(driver, edenLink, dataLimit)
 
     # Start downloading
-    scraper = ImageScraper(loginData[2], pics, path, driver)
-    scraper.scrape_images()
+    try:
+        os.mkdir(loginData[2]) # pix folder
+    except:
+        print(' ')
+    scrape_images(pixiv_links, driver)
     driver.quit()
 
 main()
