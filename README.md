@@ -29,7 +29,7 @@ WaifuHunter can help users that want a large collection of high quality characte
 
 #### Linux/Unix/Mac
 
-1. Install WaifuHunter:
+1. Download WaifuHunter:
 
 ```
 git clone https://github.com/ArtiusAstro/wHunter
