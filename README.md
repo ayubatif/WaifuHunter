@@ -23,8 +23,7 @@ WaifuHunter can help users that want a large collection of high quality characte
 
 ### Pre-requisities
 
-* Python
-[Get Python](https://www.python.org/downloads/)
+*[Get Python](https://www.python.org/downloads/)
 
 ### Quick start
 
