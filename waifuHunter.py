@@ -137,16 +137,14 @@ def isAlertPresent(driver):
 def scrape_images(pixiv_links, driver):
     for i in range(len(pixiv_links)):
         driver.get(pixiv_links[i])
+        driver.find_element_by_xpath('//*[@id="pxvdwn_l"]').click()
         while isAlertPresent(driver) is True:
             alert = driver.switch_to.alert
             alert.accept()
-        try:
             driver.find_element_by_xpath('//*[@id="pxvdwn_l"]').click()
-        except:
-            while isAlertPresent(driver) is True:
-                alert = driver.switch_to.alert
-                alert.accept()
-            driver.find_element_by_xpath('//*[@id="pxvdwn_l"]').click()
+        while isAlertPresent(driver) is True:
+            alert = driver.switch_to.alert
+            alert.accept()
         time.sleep(1)
         print("done with %d pix" %(i+1))
 
