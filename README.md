@@ -8,7 +8,7 @@
 
 WaifuHunter can help users that want a large collection of high quality character illustrations without the hassle of manual labor
 
-Created by [ASTRO 中说明](https://artiusastro.github.io/)
+Created by [ASTRO 中说明](https://ayubatif.me)
 
 ### Key features
 
