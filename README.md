@@ -8,8 +8,6 @@
 
 WaifuHunter can help users that want a large collection of high quality character illustrations without the hassle of manual labor
 
-Created by [ASTRO 中说明](https://ayubatif.me)
-
 ### Key features
 
 * Spell check for common typos on character name.
