@@ -102,11 +102,13 @@ def login(driver, username, password, EXPLICIT_CONTENT):
     userBox.send_keys(username)
     passBox.send_keys(password)
     passBox.submit()
+    driver.get("https://www.pixiv.net/setting_user.php")
     if EXPLICIT_CONTENT is True:
-        driver.get("https://www.pixiv.net/setting_user.php")
         driver.find_element_by_xpath('//*[@id="page-setting-user"]/div/div[2]/div[2]/form/table/tbody/tr[2]/td/dl/dd[1]/label[1]/input').click()
-        driver.find_element_by_xpath('//*[@id="page-setting-user"]/div/div[2]/div[2]/form/div/input').click()
-        
+    else:
+        driver.find_element_by_xpath('//*[@id="page-setting-user"]/div/div[2]/div[2]/form/table/tbody/tr[2]/td/dl/dd[1]/label[2]/input').click()
+    driver.find_element_by_xpath('//*[@id="page-setting-user"]/div/div[2]/div[2]/form/div/input').click()
+
 def collect_img_links(driver, eden, dataLimit):
     """get all jpg links"""
     pixiv_links = []
@@ -158,8 +160,10 @@ def main():
     while len(loginData[2]) < 1:
         loginData[2]=spellCheck(input("Please type waifu\n>>>"))
     EXPLICIT_CONTENT = False
+    """
     if input("type 'y' if you would like to enable explicit R18 pix, else enter: ") == 'y':
         EXPLICIT_CONTENT = True
+    """
     dataLimit = input("num of pix: ")
     while(len(dataLimit)==0):
         dataLimit = input("num of pix: ")
@@ -176,7 +180,7 @@ def main():
     'profile.default_content_setting_values.automatic_downloads': 1,
     'download.default_directory':download_path
     })
-    chrome_options.add_extension(path + '\\Pixiv-Downloader_v1.2.10.72.crx')
+    chrome_options.add_extension(path + '\\pdv1.2.10.72.crx')
     driver = webdriver.Chrome(chrome_options=chrome_options)
     extensionSetup(driver)
 
@@ -202,12 +206,6 @@ def main():
     except:
         print(' ') # use existing folder
     scrape_images(pixiv_links, driver)
-
-    # Reset R18 Filter
-    if EXPLICIT_CONTENT is True:
-        driver.get("https://www.pixiv.net/setting_user.php")
-        driver.find_element_by_xpath('//*[@id="page-setting-user"]/div/div[2]/div[2]/form/table/tbody/tr[2]/td/dl/dd[1]/label[2]/input').click()
-        driver.find_element_by_xpath('//*[@id="page-setting-user"]/div/div[2]/div[2]/form/div/input').click()
 
     # Done
     driver.quit()
