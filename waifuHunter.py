@@ -147,7 +147,7 @@ def scrape_images(pixiv_links, driver):
             while isAlertPresent(driver) is True:
                 alert = driver.switch_to.alert
                 alert.accept()
-            time.sleep(5)
+            time.sleep(1)
         except:
             continue
         print("done with %d pix" %(i+1))
