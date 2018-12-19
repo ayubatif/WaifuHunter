@@ -40,7 +40,6 @@ def findEden(driver, data2):
     driver.get('https://www.pixiv.net')
     driver.execute_script("window.open('https://www.google.com', 'new window')")
     driver.switch_to_window(driver.window_handles[2])
-    driver.minimize_window()
     search_box = driver.find_element_by_name('q')
     search_box.send_keys('pixiv %s' %(data2))
     search_box.submit()
@@ -98,7 +97,7 @@ def pixiv_links(driver, eden, dataLimit):
     while n < 1:
         driver.get(eden)
         scroll_down(driver)
-        time.sleep(5) # Wait for list load
+        time.sleep(10)
 
         pixiv_links.append(driver.current_url)
         for j in range(1,180):
@@ -127,7 +126,7 @@ def scrape_images(pixiv_links, driver):
         while isAlertPresent(driver) is True:
             alert = driver.switch_to.alert
             alert.accept()
-        time.sleep(7)
+        time.sleep(5)
         print("done with %d pix" %(i+1))
 		
 def extensionSetup(driver):
@@ -160,7 +159,6 @@ def main():
     chrome_options.add_extension(os.getcwd() + '\\pdv1.2.10.72.crx')
     driver = webdriver.Chrome(chrome_options=chrome_options)
     extensionSetup(driver)
-    driver.minimize_window()
     login(driver, loginData[0], loginData[1], EXPLICIT_CONTENT)
     try:
         os.mkdir(loginData[2])
