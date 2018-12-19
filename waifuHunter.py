@@ -58,39 +58,34 @@ def nextPage(nodeFinder, driver):
 
 def findEden(driver):
     """Returns edenLink if found"""
-    exit = 0;
-
+    
     edenNode = None # the edenNode is the element to the initial pixiv pic
     edenFound = 0
     nodeFinder = 1 # incrementing int to find edenNode
 
     while edenFound is 0:
-        if exit > 4:
+        if nodeFinder > 100:
             print("couldnt find a link to a pic, try another character")
-            os.exit()
-        xpath = '//*[@id="rso"]/div/div/div[%s]/div/div/h3/a' %(nodeFinder)
+            driver.quit()
+            main()
+
+        # Load next page of results
+        if nodeFinder%10 is 0:
+            nextPage(nodeFinder, driver)
+
+        xpath = '//*[@id="rso"]/div[1]/div/div[%s]/div/div/div[1]/a[1]' %(nodeFinder%10)
 
         # Get a search result
+        nodeFinder = nodeFinder + 1
         try:
             edenNode = driver.find_element_by_xpath(xpath)
         except:
-            nextPage(nodeFinder, driver)
-            exit = exit + 1
             continue
-
-        # Get link
-        edenLink = edenNode.get_attribute('href')
-        print(edenLink)
-
+        
         # Check if link leads to illust
+        edenLink = edenNode.get_attribute('href')
         if "illust.php" in edenLink:
             edenFound = 1
-
-        nodeFinder = nodeFinder    + 1
-
-        # Load next page of results
-        if nodeFinder > 10:
-            nextPage(nodeFinder, driver)
 
     return edenLink
 
@@ -98,6 +93,8 @@ def scroll_down(driver):
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
 def login(driver, username, password, EXPLICIT_CONTENT):
+    from selenium.webdriver.common.keys import Keys
+    
     """Go to login page and attempt login"""
     driver.get('https://accounts.pixiv.net/login')
     userBox = driver.find_element_by_xpath('//*[@id="LoginComponent"]/form/div[1]/div[1]/input')
@@ -109,7 +106,7 @@ def login(driver, username, password, EXPLICIT_CONTENT):
         driver.get("https://www.pixiv.net/setting_user.php")
         driver.find_element_by_xpath('//*[@id="page-setting-user"]/div/div[2]/div[2]/form/table/tbody/tr[2]/td/dl/dd[1]/label[1]/input').click()
         driver.find_element_by_xpath('//*[@id="page-setting-user"]/div/div[2]/div[2]/form/div/input').click()
-
+        
 def collect_img_links(driver, eden, dataLimit):
     """get all jpg links"""
     pixiv_links = []
@@ -124,7 +121,7 @@ def collect_img_links(driver, eden, dataLimit):
 
         pixiv_links.append(driver.current_url)
         for j in range(1,180):
-            url = driver.find_element_by_xpath('//*[@id="root"]/div[1]/div/aside[3]/div[1]/ul/li[%d]/div/a[2]' %(j)).get_attribute('href')
+            url = driver.find_element_by_xpath('//*[@id="root"]/div[1]/div/aside[3]/div[1]/ul/li[%s]/div/a'%(j)).get_attribute('href')
             pixiv_links.append(url)
             if (180*i + j + i+1) > dataLimit:
                 n = 1
@@ -137,7 +134,7 @@ def collect_img_links(driver, eden, dataLimit):
 
 def isAlertPresent(driver):
     try:
-        driver.switch_to().alert();
+        driver.switch_to().alert()
         return True
     except:
         return False
@@ -150,18 +147,23 @@ def scrape_images(pixiv_links, driver):
             while isAlertPresent(driver) is True:
                 alert = driver.switch_to.alert
                 alert.accept()
-            time.sleep(8)
+            time.sleep(5)
         except:
             continue
         print("done with %d pix" %(i+1))
 
 def main():
     # Get input. user=loginData[0] pass=loginData[1] waifu=loginData[2]
-    loginData = ['whxsss', 'saberisbestdotcom', spellCheck(input("Please type waifu\n>>>"))]
+    loginData = ['whxsss', 'saberisbestdotcom', '']
+    while len(loginData[2]) < 1:
+        loginData[2]=spellCheck(input("Please type waifu\n>>>"))
     EXPLICIT_CONTENT = False
     if input("type 'y' if you would like to enable explicit R18 pix, else enter: ") == 'y':
         EXPLICIT_CONTENT = True
-    dataLimit = int(input("num of pix: "))
+    dataLimit = input("num of pix: ")
+    while(len(dataLimit)==0):
+        dataLimit = input("num of pix: ")
+    dataLimit = int(dataLimit)
     path = os.getcwd()
     download_path = path + '\\' + loginData[2]
     print('Downloading %d pix to %s' %(dataLimit, download_path))
@@ -182,7 +184,8 @@ def main():
     login(driver, loginData[0], loginData[1], EXPLICIT_CONTENT)
 
     # Homepage search
-    driver.get('http://www.google.com/xhtml')
+    driver.execute_script("window.open('https://www.google.com', 'new window')")
+    driver.switch_to_window(driver.window_handles[2])
     search_box = driver.find_element_by_name('q')
     search_box.send_keys('pixiv %s' %(loginData[2]))
     search_box.submit()
