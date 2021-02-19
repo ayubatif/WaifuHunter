@@ -14,9 +14,8 @@ WaifuHunter can help users that want a large collection of high quality characte
 * Facilitated use with exe and pre configured options.
 * Once set up with character name and image count, fully automated.
 * A chrome extension is bundled for the web scraping but does not persist on your Chrome configs.
-* Can theoretically download an infinite amount of pictures.
-* Fully equipped with exception handling.
 * Downloads images to a dynamically created folder within the working directory.
+* Can theoretically download an infinite amount of pictures.
 * Downloads your waifu!
 
 ### Pre-requisities
