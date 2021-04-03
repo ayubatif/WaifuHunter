@@ -135,7 +135,7 @@ def extensionSetup(driver):
     driver.find_element_by_xpath('//*[@id="save"]').click()
 
 def main():
-    loginData = ['whxsss', 'saberisbestdotcom', '']
+    loginData = ['whxsss', 'saberisbestdotcom', ''] # Git secrets can be used instead here
     while len(loginData[2]) < 1:
         loginData[2]=spellCheck(input("Please type waifu\n>>>"))
     EXPLICIT_CONTENT = False
